@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#007aff" />
+      <stop offset="100%" stop-color="#0056b3" />
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="512" height="512" rx="112" fill="url(#bgGrad)" />
+  <!-- Truck Icon Outline -->
+  <path d="M80 140h270v140H80z" fill="none" />
+  <path d="M420 220h-50v-60c0-11-9-20-20-20H80c-11 0-20 9-20 20v140c0 11 9 20 20 20h20c0 22 18 40 40 40s40-18 40-40h160c0 22 18 40 40 40s40-18 40-40h40c11 0 20-9 20-20v-60c0-22-18-40-40-40zm-280 80c-11 0-20-9-20-20s9-20 20-20 20 9 20 20-9 20-20 20zm240 0c-11 0-20-9-20-20s9-20 20-20 20 9 20 20-9 20-20 20zm40-60h-40v-40h20c11 0 20 9 20 20v20z" fill="#ffffff" />
+  <!-- Green checkmark badge -->
+  <circle cx="380" cy="132" r="70" fill="#34c759" stroke="#ffffff" stroke-width="8" />
+  <path d="M350 132l20 20 40-40" stroke="#ffffff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" fill="none" />
+</svg>

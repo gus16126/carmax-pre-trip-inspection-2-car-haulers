@@ -1,0 +1,17 @@
+{
+  "name": "CarMax Pre-Trip Assistant",
+  "short_name": "Pre-Trip",
+  "description": "Pre-trip inspection checklist for CarMax two-car hauler drivers.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f2f2f7",
+  "theme_color": "#007aff",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
