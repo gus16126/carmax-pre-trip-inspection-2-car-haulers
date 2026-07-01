@@ -75,3 +75,8 @@ Stores up to 50 previous completed inspections.
   - Add native media Lightbox Modal to slide and swipe through photos inline.
   - Add print CSS rules and a **Print Report** button for PDF downloads.
   - Link project to `github.com/gus16126/carmax-pre-trip-inspection-2-car-haulers.git` and save Personal Access Token (PAT) for automatic push commands.
+* **2026-06-30**:
+  - Pulled updates to synchronize the local computer workspace with the remote repository (including the new `CDL_Wheel_Rim_Inside.jpg` asset).
+  - Implemented interactive zoom-and-pan support for lightbox photos (2.5x toggle on tap/click with touch dragging/swiping).
+  - Added a visual helper subtitle in the lightbox caption (`🔍 Tap image to zoom / drag to pan`) for user instructions and PWA update confirmation.
+  - Incremented PWA cache version to `v4` in `sw.js` and added `CDL_Wheel_Rim_Inside.jpg` to assets cache list.
