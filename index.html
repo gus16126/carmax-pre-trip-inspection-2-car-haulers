@@ -574,6 +574,9 @@
             box-shadow: var(--shadow-md);
             transform: scale(0.95);
             transition: transform 0.3s ease;
+            cursor: zoom-in;
+            user-select: none;
+            -webkit-user-drag: none;
         }
 
         .lightbox-modal.active .lightbox-content {
@@ -1668,6 +1671,25 @@ if ('serviceWorker' in navigator) {
 let lightboxImages = [];
 let currentLightboxIndex = 0;
 
+// Zoom & Pan state variables
+let isZoomed = false;
+let isDragging = false;
+let startX = 0, startY = 0;
+let translateX = 0, translateY = 0;
+let currentScale = 1;
+
+function resetZoom() {
+    const img = document.getElementById('lightboxImg');
+    if (img) {
+        isZoomed = false;
+        translateX = 0;
+        translateY = 0;
+        currentScale = 1;
+        img.style.transform = 'scale(1) translate(0px, 0px)';
+        img.style.cursor = 'zoom-in';
+    }
+}
+
 function initLightbox() {
     const photoLinks = document.querySelectorAll('a[href$=".jpg"], a[href$=".jpeg"]');
     lightboxImages = Array.from(photoLinks).map((link, index) => {
@@ -1683,11 +1705,76 @@ function initLightbox() {
             caption: labelText
         };
     });
+
+    // Set up zoom & pan events once
+    const img = document.getElementById('lightboxImg');
+    if (img) {
+        img.addEventListener('click', function(e) {
+            if (!isZoomed) {
+                isZoomed = true;
+                currentScale = 2.5;
+                img.style.cursor = 'zoom-out';
+                
+                // Zoom relative to where the user clicked/tapped
+                const rect = img.getBoundingClientRect();
+                const offsetX = e.clientX - rect.left - rect.width / 2;
+                const offsetY = e.clientY - rect.top - rect.height / 2;
+                translateX = -offsetX;
+                translateY = -offsetY;
+                
+                img.style.transform = `scale(${currentScale}) translate(${translateX / currentScale}px, ${translateY / currentScale}px)`;
+            } else {
+                resetZoom();
+            }
+        });
+
+        // Panning handler
+        function startDrag(e) {
+            if (!isZoomed) return;
+            isDragging = true;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            startX = clientX - translateX;
+            startY = clientY - translateY;
+            img.style.transition = 'none';
+        }
+
+        function doDrag(e) {
+            if (!isDragging) return;
+            e.preventDefault();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            translateX = clientX - startX;
+            translateY = clientY - startY;
+
+            // Constrain movement based on image bounds and scale
+            const maxTranslateX = (img.width * (currentScale - 1)) / 2;
+            const maxTranslateY = (img.height * (currentScale - 1)) / 2;
+            translateX = Math.max(-maxTranslateX, Math.min(maxTranslateX, translateX));
+            translateY = Math.max(-maxTranslateY, Math.min(maxTranslateY, translateY));
+
+            img.style.transform = `scale(${currentScale}) translate(${translateX / currentScale}px, ${translateY / currentScale}px)`;
+        }
+
+        function endDrag() {
+            isDragging = false;
+            img.style.transition = 'transform 0.3s ease';
+        }
+
+        img.addEventListener('mousedown', startDrag);
+        window.addEventListener('mousemove', doDrag);
+        window.addEventListener('mouseup', endDrag);
+
+        img.addEventListener('touchstart', startDrag, {passive: false});
+        window.addEventListener('touchmove', doDrag, {passive: false});
+        window.addEventListener('touchend', endDrag);
+    }
 }
 
 function openLightbox(index) {
     const modal = document.getElementById('lightboxModal');
     currentLightboxIndex = index;
+    resetZoom();
     updateLightboxContent();
     modal.style.display = 'flex';
     setTimeout(() => modal.classList.add('active'), 10);
@@ -1697,10 +1784,12 @@ function closeLightbox() {
     const modal = document.getElementById('lightboxModal');
     modal.classList.remove('active');
     setTimeout(() => modal.style.display = 'none', 300);
+    resetZoom();
 }
 
 function changeLightboxImage(direction) {
     currentLightboxIndex = (currentLightboxIndex + direction + lightboxImages.length) % lightboxImages.length;
+    resetZoom();
     updateLightboxContent();
 }
 
