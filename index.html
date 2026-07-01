@@ -1709,16 +1709,18 @@ function initLightbox() {
     // Set up zoom & pan events once
     const img = document.getElementById('lightboxImg');
     if (img) {
-        img.addEventListener('click', function(e) {
+        let touchStartTime = 0;
+        let touchStartX = 0, touchStartY = 0;
+
+        function toggleZoom(clientX, clientY) {
             if (!isZoomed) {
                 isZoomed = true;
                 currentScale = 2.5;
                 img.style.cursor = 'zoom-out';
                 
-                // Zoom relative to where the user clicked/tapped
                 const rect = img.getBoundingClientRect();
-                const offsetX = e.clientX - rect.left - rect.width / 2;
-                const offsetY = e.clientY - rect.top - rect.height / 2;
+                const offsetX = clientX - rect.left - rect.width / 2;
+                const offsetY = clientY - rect.top - rect.height / 2;
                 translateX = -offsetX;
                 translateY = -offsetY;
                 
@@ -1726,24 +1728,19 @@ function initLightbox() {
             } else {
                 resetZoom();
             }
-        });
+        }
 
-        // Panning handler
-        function startDrag(e) {
+        // Panning helper
+        function startDrag(clientX, clientY) {
             if (!isZoomed) return;
             isDragging = true;
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
             startX = clientX - translateX;
             startY = clientY - translateY;
             img.style.transition = 'none';
         }
 
-        function doDrag(e) {
+        function doDrag(clientX, clientY) {
             if (!isDragging) return;
-            e.preventDefault();
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
             translateX = clientX - startX;
             translateY = clientY - startY;
 
@@ -1761,13 +1758,59 @@ function initLightbox() {
             img.style.transition = 'transform 0.3s ease';
         }
 
-        img.addEventListener('mousedown', startDrag);
-        window.addEventListener('mousemove', doDrag);
+        // Desktop Mouse Events
+        img.addEventListener('click', function(e) {
+            // Only trigger click zoom if not dragging
+            if (e.detail === 1) {
+                toggleZoom(e.clientX, e.clientY);
+            }
+        });
+
+        img.addEventListener('mousedown', function(e) {
+            startDrag(e.clientX, e.clientY);
+        });
+
+        window.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                e.preventDefault();
+                doDrag(e.clientX, e.clientY);
+            }
+        });
+
         window.addEventListener('mouseup', endDrag);
 
-        img.addEventListener('touchstart', startDrag, {passive: false});
-        window.addEventListener('touchmove', doDrag, {passive: false});
-        window.addEventListener('touchend', endDrag);
+        // Mobile Touch Events
+        img.addEventListener('touchstart', function(e) {
+            const touch = e.touches[0];
+            touchStartX = touch.clientX;
+            touchStartY = touch.clientY;
+            touchStartTime = Date.now();
+            startDrag(touch.clientX, touch.clientY);
+        }, {passive: false});
+
+        window.addEventListener('touchmove', function(e) {
+            if (isDragging) {
+                e.preventDefault();
+                const touch = e.touches[0];
+                doDrag(touch.clientX, touch.clientY);
+            }
+        }, {passive: false});
+
+        window.addEventListener('touchend', function(e) {
+            if (isDragging) {
+                const touch = e.changedTouches[0];
+                const distX = Math.abs(touch.clientX - touchStartX);
+                const distY = Math.abs(touch.clientY - touchStartY);
+                const duration = Date.now() - touchStartTime;
+
+                // Treat as a tap if touch was short and didn't move
+                if (duration < 250 && distX < 10 && distY < 10) {
+                    e.preventDefault();
+                    toggleZoom(touch.clientX, touch.clientY);
+                }
+                endDrag();
+            }
+        });
     }
 }
 
@@ -1799,7 +1842,7 @@ function updateLightboxContent() {
     const item = lightboxImages[currentLightboxIndex];
     if (item) {
         img.src = item.src;
-        caption.textContent = item.caption + ` (${currentLightboxIndex + 1}/${lightboxImages.length})`;
+        caption.innerHTML = item.caption + ` (${currentLightboxIndex + 1}/${lightboxImages.length})<br><span style="color: #007aff; font-size: 14px; font-weight: bold; margin-top: 6px; display: inline-block;">🔍 Tap image to zoom / drag to pan</span>`;
     }
 }
 
