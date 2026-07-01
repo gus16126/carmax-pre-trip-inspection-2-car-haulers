@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pre-trip-cache-v1';
+const CACHE_NAME = 'pre-trip-cache-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -16,7 +16,8 @@ const ASSETS = [
   './CDL_Step 2-Front_Cab_Hood_Hinges_Inspection.jpg',
   './CDL_Step 2-Front_Cab_Inspection.jpg',
   './CDL_Top_Radiator_Hose.jpg',
-  './CDL_Water_Pump.jpg'
+  './CDL_Water_Pump.jpg',
+  './CDL_Wheel_Rim_Inside.jpg'
 ];
 
 // Install Event
